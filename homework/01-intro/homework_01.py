@@ -68,8 +68,19 @@ search_query = {
 }
 
 response = es_client.search(index=index_name, body=search_query)
+
 results_docs = []
 for hit in response['hits']['hits']:
-    results_docs.append(hit)
+    results_docs.append(hit['_source'])
 
-pprint(results_docs)
+context = ""
+for doc in results_docs:
+    context = context + f"question: {doc['question']}\nanswer: {doc['text']}\n\n"
+
+context_template = """
+Q: {question}
+A: {context}
+""".strip()
+
+prompt = context_template.format(question=query, context=context).strip()
+print(f'Length of prompt: {len(prompt)}')
