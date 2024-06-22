@@ -1,5 +1,6 @@
 import requests
 from elasticsearch import Elasticsearch
+import tiktoken
 from pprint import pprint
 
 docs_url = 'https://github.com/DataTalksClub/llm-zoomcamp/blob/main/01-intro/documents.json?raw=1'
@@ -84,3 +85,13 @@ A: {context}
 
 prompt = context_template.format(question=query, context=context).strip()
 print(f'Length of prompt: {len(prompt)}')
+encoding = tiktoken.encoding_for_model("gpt-4o")
+
+
+def num_tokens_from_string(string: str, encoding_name: str) -> int:
+    """Returns the number of tokens in a text string."""
+    encoding = tiktoken.get_encoding(encoding_name)
+    num_tokens = len(encoding.encode(string))
+    return num_tokens
+
+print(f"Number of tokens in prompt: {num_tokens_from_string(prompt, 'o200k_base')}")
