@@ -79,6 +79,7 @@ for doc in results_docs:
     context = context + f"question: {doc['question']}\nanswer: {doc['text']}\n\n"
 
 context_template = """
+You're a course teaching assistant
 Q: {question}
 A: {context}
 """.strip()
@@ -94,4 +95,4 @@ def num_tokens_from_string(string: str, encoding_name: str) -> int:
     num_tokens = len(encoding.encode(string))
     return num_tokens
 
-print(f"Number of tokens in prompt: {num_tokens_from_string(prompt, 'o200k_base')}")
+print(f"Number of tokens in prompt: {num_tokens_from_string(prompt, 'cl100k_base')}")
