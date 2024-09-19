@@ -2,7 +2,7 @@ import requests
 
 
 # Function to search Wikipedia for pages related to solar eclipses
-def retrieve_wikipedia_page_titles(query, limit=100):
+def retrieve_page_titles(query, limit=100):
     base_url = "https://en.wikipedia.org/w/api.php"
 
     # Parameters for Wikipedia API search
