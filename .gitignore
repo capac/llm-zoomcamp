@@ -167,3 +167,6 @@ ollama_files/
 # Orchestration file versions
 .file_versions/
 
+# various data folders
+data/
+wikipedia_pages/
