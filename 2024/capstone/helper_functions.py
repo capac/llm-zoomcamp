@@ -1,9 +1,10 @@
 import requests
 
+
 # Function to search Wikipedia for pages related to solar eclipses
 def retrieve_wikipedia_page_titles(query, limit=100):
     base_url = "https://en.wikipedia.org/w/api.php"
-    
+
     # Parameters for Wikipedia API search
     params = {
         "action": "query",
@@ -12,9 +13,9 @@ def retrieve_wikipedia_page_titles(query, limit=100):
         "format": "json",
         "srlimit": limit  # Limit the number of results
     }
-    
+
     response = requests.get(base_url, params=params)
-    
+
     if response.status_code == 200:
         data = response.json()
         search_results = data['query']['search']

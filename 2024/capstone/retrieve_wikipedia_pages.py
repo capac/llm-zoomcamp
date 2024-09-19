@@ -15,6 +15,7 @@ output_dir.mkdir(parents=True, exist_ok=True)
 # Base URL for the Wikipedia API (action=parse to get the full content)
 base_url = "https://en.wikipedia.org/w/api.php"
 
+
 # Function to fetch and save Wikipedia page as JSON
 def fetch_and_save_wikipedia_page(page_title):
     params = {
@@ -32,10 +33,12 @@ def fetch_and_save_wikipedia_page(page_title):
         content = data['query']['pages'][page_id]['extract']
         file_path = output_dir / f"{page_title}.json"
         with file_path.open("w", encoding="utf-8") as file:
-            json.dump({"title": page_title, "content": content}, file, indent=4, ensure_ascii=False)
+            json.dump({"title": page_title, "content": content}, file,
+                      indent=4, ensure_ascii=False)
         print(f"Saved: {file_path}")
     else:
         print(f"Failed to retrieve: {page_title}")
+
 
 # Retrieve and save each Wikipedia page
 for title in page_titles:
