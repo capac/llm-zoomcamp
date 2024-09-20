@@ -7,6 +7,7 @@ from helper_functions import retrieve_page_titles
 
 # Download the necessary resources for sentence tokenization
 nltk.download('punkt')
+nltk.download('punkt_tab')
 
 # Main code to search for solar eclipse related pages and extract their titles
 query = "solar eclipse"
