@@ -3,11 +3,17 @@ from bs4 import BeautifulSoup
 import hashlib
 import json
 import nltk
+from pathlib import Path
 from helper_functions import retrieve_page_titles
 
 # Download the necessary resources for sentence tokenization
 nltk.download('punkt')
 nltk.download('punkt_tab')
+
+# Specify the path of the directory you want to create
+directory_path = Path('wikipedia_pages')
+# Create the directory if it doesn't exist
+directory_path.mkdir(parents=True, exist_ok=True)
 
 # Main code to search for solar eclipse related pages and extract their titles
 query = "solar eclipse"
@@ -142,7 +148,7 @@ def process_multiple_pages(page_titles, max_tokens=1024):
         # Save each chunked content to a unique JSON file
         if chunked_content:
             file_name = f"{page_title}_chunks.json"
-            save_chunks_as_json(chunked_content, file_name)
+            save_chunks_as_json(chunked_content, directory_path / file_name)
             print(f"Chunks saved in {file_name}")
         else:
             print(f"Failed to process page: {page_title}")
