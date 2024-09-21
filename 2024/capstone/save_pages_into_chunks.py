@@ -10,9 +10,9 @@ from helper_functions import retrieve_page_titles
 nltk.download('punkt')
 nltk.download('punkt_tab')
 
-# Specify the path of the directory you want to create
+# Specify the path of the directory to create
+# and  if it doesn't exist create it
 directory_path = Path('wikipedia_pages')
-# Create the directory if it doesn't exist
 directory_path.mkdir(parents=True, exist_ok=True)
 
 # Main code to search for solar eclipse related pages and extract their titles
@@ -62,7 +62,7 @@ def split_into_sentences(content):
 
 
 # Function to chunk sentences into blocks of approximately 1024 tokens
-def chunk_sentences(sentences, max_tokens=1024):
+def chunk_sentences(sentences, max_tokens=512):
     """
     Chunk sentences into blocks, where each block has a maximum token
     count (approx. 1024 tokens). This function ensures that chunks contain
