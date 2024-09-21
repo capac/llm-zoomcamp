@@ -2,13 +2,9 @@ import requests
 from bs4 import BeautifulSoup
 import hashlib
 import json
-import nltk
+import re
 from pathlib import Path
 from helper_functions import retrieve_page_titles
-
-# Download the necessary resources for sentence tokenization
-nltk.download('punkt')
-nltk.download('punkt_tab')
 
 # Specify the path of the directory to create
 # and  if it doesn't exist create it
@@ -42,88 +38,82 @@ def fetch_wikipedia_content(page_title):
         return None
 
 
-# Function to create unique IDs using a hash function
-def generate_hash_id(text, prefix="doc"):
-    """
-    Generate a unique hash ID for a given text. This is
-    useful for creating unique IDs for documents and chunks.
-    """
-    hash_object = hashlib.sha256(text.encode('utf-8'))
-    return f"{prefix}_{hash_object.hexdigest()}"
+# Function to clean the text (remove newlines and citation references)
+def clean_text(text):
+    # Remove newline characters
+    text = text.replace('\n', ' ').replace('\r', '')
+
+    # Remove citation references, e.g. [1], [2], [3]
+    text = re.sub(r'\[\d+\]', '', text)
+
+    # Remove extra spaces
+    text = re.sub(r'\s+', ' ', text).strip()
+
+    return text
 
 
-# Function to split content into sentences
-def split_into_sentences(content):
-    """
-    Use NLTK to split content into a list of sentences.
-    """
-    sentences = nltk.sent_tokenize(content)
-    return sentences
+# Function to chunk text into logical blocks
+# (complete sentences and reasonable size)
+def chunk_text(text, max_tokens):
+    # Split the text by sentence boundaries using regular expression
+    sentences = re.split(r'(?<=\.) ', text)
 
-
-# Function to chunk sentences into blocks of approximately 1024 tokens
-def chunk_sentences(sentences, max_tokens=512):
-    """
-    Chunk sentences into blocks, where each block has a maximum token
-    count (approx. 1024 tokens). This function ensures that chunks contain
-    complete sentences.
-    """
     chunks = []
     current_chunk = []
-    current_length = 0
+    current_chunk_len = 0
 
+    # Iterate through sentences and create chunks
     for sentence in sentences:
-        # Estimate the token length of the sentence
-        # (tokens are approximated by splitting by spaces)
-        sentence_length = len(sentence.split())
+        # Token count approximation based on word count
+        sentence_len = len(sentence.split())
 
-        # If adding the sentence exceeds max_tokens, finalize the current chunk
-        if current_length + sentence_length > max_tokens and current_chunk:
-            chunks.append(" ".join(current_chunk))
+        if current_chunk_len + sentence_len > max_tokens:
+            # If adding this sentence exceeds the limit, save the current chunk
+            chunks.append(' '.join(current_chunk))
             current_chunk = [sentence]
-            current_length = sentence_length
+            # Start a new chunk with the current sentence
+            current_chunk_len = sentence_len
         else:
+            # Add sentence to the current chunk
             current_chunk.append(sentence)
-            current_length += sentence_length
+            current_chunk_len += sentence_len
 
-    # Add any remaining sentences as the last chunk
+    # Don't forget the last chunk
     if current_chunk:
-        chunks.append(" ".join(current_chunk))
+        chunks.append(' '.join(current_chunk))
 
     return chunks
 
 
-# Function to process and chunk Wikipedia content
-def process_wikipedia_page(page_title, max_tokens=1024):
-    """
-    Process a Wikipedia page by fetching its content, chunking
-    it into sentences, and returning JSON-like chunks with unique
-    document and chunk IDs.
-    """
+# Function to generate unique IDs using a hash function (SHA-256)
+def generate_unique_id(text):
+    return hashlib.sha256(text.encode('utf-8')).hexdigest()
+
+
+# Function to process the article and save chunks in JSON format
+def process_wikipedia_article(page_title, max_tokens):
     content = fetch_wikipedia_content(page_title)
 
     if content:
-        # Generate a unique document ID for the page
-        doc_id = generate_hash_id(page_title, prefix="doc")
+        clean_content = clean_text(content)
+        chunks = chunk_text(clean_content, max_tokens)
 
-        # Split the content into sentences
-        sentences = split_into_sentences(content)
+        # Generate document ID from the page title
+        doc_id = generate_unique_id(page_title)
 
-        # Chunk the sentences into blocks of approximately max_tokens
-        chunks = chunk_sentences(sentences, max_tokens)
-
-        # Create a list of chunk dictionaries
-        chunked_content = []
+        # Prepare JSON structure with chunks and unique IDs
+        chunked_data = []
         for i, chunk in enumerate(chunks):
-            chunk_id = generate_hash_id(chunk, prefix="chunk")
-            chunked_content.append({
+            chunk_id = generate_unique_id(f"{doc_id}_{i}")
+            chunked_data.append({
                 "doc_id": doc_id,
                 "chunk_id": chunk_id,
                 "text": chunk
             })
 
-        return chunked_content
-    return None
+        return chunked_data
+    else:
+        return []
 
 
 # Function to save chunks in JSON format
@@ -136,14 +126,15 @@ def save_chunks_as_json(chunks, file_name):
 
 
 # Main script to process multiple Wikipedia articles
-def process_multiple_pages(page_titles, max_tokens=1024):
+def process_multiple_pages(page_titles, max_tokens):
     """
     Process multiple Wikipedia pages by fetching their content
     and chunking them. Each page is saved as a separate JSON file.
     """
     for page_title in page_titles:
         # Process the Wikipedia page and get chunked content
-        chunked_content = process_wikipedia_page(page_title, max_tokens)
+        chunked_content = process_wikipedia_article(page_title,
+                                                    max_tokens)
 
         # Save each chunked content to a unique JSON file
         if chunked_content:
@@ -156,4 +147,4 @@ def process_multiple_pages(page_titles, max_tokens=1024):
 
 # Process the pages and chunk their content into JSON files
 page_titles = retrieve_page_titles(query, limit)
-process_multiple_pages(page_titles, max_tokens=1024)
+process_multiple_pages(page_titles, max_tokens=64)
