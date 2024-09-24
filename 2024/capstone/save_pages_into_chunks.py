@@ -145,6 +145,12 @@ def process_multiple_pages(page_titles, max_tokens):
             print(f"Failed to process page: {page_title}")
 
 
-# Process the pages and chunk their content into JSON files
-page_titles = retrieve_page_titles(query, limit)
-process_multiple_pages(page_titles, max_tokens=64)
+# Main script
+def main():
+    # Process the pages and chunk their content into JSON files
+    page_titles = retrieve_page_titles(query, limit)
+    process_multiple_pages(page_titles, max_tokens=64)
+
+
+if __name__ == "__main__":
+    main()
