@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import hashlib
 import json
 import re
+from io import StringIO
+import pandas as pd
 from pathlib import Path
 from helper_functions import retrieve_page_titles
 
@@ -13,7 +15,7 @@ directory_path.mkdir(parents=True, exist_ok=True)
 
 # Main code to search for solar eclipse related pages and extract their titles
 query = "solar eclipse"
-limit = 200  # Number of pages to retrieve
+limit = 20  # Number of pages to retrieve
 
 
 # Function to fetch content from a Wikipedia page
@@ -32,10 +34,32 @@ def fetch_wikipedia_content(page_title):
         content = "\n".join([para.get_text() for para in content_paragraphs
                              if para.get_text().strip()])
 
-        return content
+        # Extracting tables
+        tables = soup.find_all('table', {'class': 'wikitable'})
+        table_data = []
+        for table in tables:
+            table_data.append(parse_html_table(table))
+
+        return content, table_data
     else:
         print(f"Failed to fetch {page_title}")
-        return None
+        return None, None
+
+
+# Function to parse an HTML table using pandas
+def parse_html_table(table):
+    # Use pandas to read the HTML table into a DataFrame
+    try:
+        # Read the first table as DataFrame
+        table_df = pd.read_html(StringIO(str(table)))[0]
+        # Convert tuple keys (if any) to strings in the table DataFrame
+        table_df.columns = [str(col) if isinstance(col, tuple)
+                            else col for col in table_df.columns]
+        # Convert DataFrame to list of dictionaries (JSON-like)
+        return table_df.to_dict(orient='records')
+    except ValueError:
+        print("Failed to parse table")
+        return []
 
 
 # Function to clean the text (remove newlines and citation references)
@@ -92,7 +116,7 @@ def generate_unique_id(text):
 
 # Function to process the article and save chunks in JSON format
 def process_wikipedia_article(page_title, max_tokens):
-    content = fetch_wikipedia_content(page_title)
+    content, tables = fetch_wikipedia_content(page_title)
 
     if content:
         clean_content = clean_text(content)
@@ -110,6 +134,16 @@ def process_wikipedia_article(page_title, max_tokens):
                 "chunk_id": chunk_id,
                 "text": chunk
             })
+
+        # Add tables to the JSON structure
+        if tables:
+            for i, table in enumerate(tables):
+                table_id = generate_unique_id(f"{doc_id}_table_{i}")
+                chunked_data.append({
+                    "doc_id": doc_id,
+                    "chunk_id": table_id,
+                    "table": table
+                })
 
         return chunked_data
     else:
