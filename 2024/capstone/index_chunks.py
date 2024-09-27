@@ -45,9 +45,9 @@ def index_chunks(chunks, file):
               f"Elasticsearch from {file.name}.")
     except helpers.BulkIndexError as e:
         # Log errors and failed documents
-        print(f"Bulk indexing failed: {e}")
-        # for err in e.errors:
-        #     print("Error document:", err)
+        print(f"Bulk indexing failed for {file.name}: {e}")
+        for err in e.errors:
+            print("Error document:", err, '\n')
 
 
 # Load the chunked data from the JSON file
