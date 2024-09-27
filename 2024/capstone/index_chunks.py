@@ -32,14 +32,22 @@ def index_chunks(chunks, file):
             "_source": {
                 "doc_id": chunk['doc_id'],
                 "chunk_id": chunk['chunk_id'],
-                "text": chunk['text']
+                "text": chunk.get('text', ""),
+                "table": chunk.get('table', None)
             }
         }
         actions.append(action)
 
-    # Bulk index the data to Elasticsearch
-    helpers.bulk(es, actions)
-    print(f"Indexed {len(actions)} chunks to Elasticsearch from {file.name}.")
+    try:
+        # Bulk index the data to Elasticsearch
+        helpers.bulk(es, actions)
+        print(f"Indexed {len(actions)} chunks to "
+              f"Elasticsearch from {file.name}.")
+    except helpers.BulkIndexError as e:
+        # Log errors and failed documents
+        print(f"Bulk indexing failed: {e}")
+        # for err in e.errors:
+        #     print("Error document:", err)
 
 
 # Load the chunked data from the JSON file
