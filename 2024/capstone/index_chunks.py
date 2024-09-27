@@ -20,6 +20,10 @@ def create_index():
         print(f"Index '{index_name}' already exists.")
 
 
+def store_table_as_string(table):
+    return json.dumps(table)
+
+
 # Function to bulk index chunks to Elasticsearch
 def index_chunks(chunks, file):
     actions = []
@@ -33,7 +37,7 @@ def index_chunks(chunks, file):
                 "doc_id": chunk['doc_id'],
                 "chunk_id": chunk['chunk_id'],
                 "text": chunk.get('text', ""),
-                "table": chunk.get('table', None)
+                "table": store_table_as_string(chunk.get('table', None))
             }
         }
         actions.append(action)
