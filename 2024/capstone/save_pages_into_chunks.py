@@ -9,13 +9,13 @@ from pathlib import Path
 from helper_functions import retrieve_page_titles
 
 # Specify the path of the directory to create
-# and  if it doesn't exist create it
+# and if it doesn't exist create it
 directory_path = Path('wikipedia_pages')
 directory_path.mkdir(parents=True, exist_ok=True)
 
 # Main code to search for solar eclipse related pages and extract their titles
 query = "solar eclipse"
-limit = 20  # Number of pages to retrieve
+limit = 200  # Number of pages to retrieve
 
 
 # Function to fetch content from a Wikipedia page
@@ -28,12 +28,10 @@ def fetch_wikipedia_content(page_title):
 
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, 'html.parser')
-
         # Extract the main content (all paragraphs in the main content area)
         content_paragraphs = soup.find_all('p')
         content = "\n".join([para.get_text() for para in content_paragraphs
                              if para.get_text().strip()])
-
         # Extracting tables
         tables = soup.find_all('table', {'class': 'wikitable'})
         table_data = []
@@ -66,13 +64,10 @@ def parse_html_table(table):
 def clean_text(text):
     # Remove newline characters
     text = text.replace('\n', ' ').replace('\r', '')
-
     # Remove citation references, e.g. [1], [2], [3]
     text = re.sub(r'\[\d+\]', '', text)
-
     # Remove extra spaces
     text = re.sub(r'\s+', ' ', text).strip()
-
     return text
 
 
@@ -101,11 +96,9 @@ def chunk_text(text, max_tokens):
             # Add sentence to the current chunk
             current_chunk.append(sentence)
             current_chunk_len += sentence_len
-
     # Don't forget the last chunk
     if current_chunk:
         chunks.append(' '.join(current_chunk))
-
     return chunks
 
 
@@ -121,7 +114,6 @@ def process_wikipedia_article(page_title, max_tokens):
     if content:
         clean_content = clean_text(content)
         chunks = chunk_text(clean_content, max_tokens)
-
         # Generate document ID from the page title
         doc_id = generate_unique_id(page_title)
 
@@ -152,9 +144,7 @@ def process_wikipedia_article(page_title, max_tokens):
 
 # Function to save chunks in JSON format
 def save_chunks_as_json(chunks, file_name):
-    """
-    Save the list of chunk dictionaries into a JSON file.
-    """
+    # Save the list of chunk dictionaries into a JSON file.
     with open(file_name, 'w', encoding='utf-8') as f:
         json.dump(chunks, f, ensure_ascii=False, indent=4)
 
