@@ -5,6 +5,7 @@ import json
 import re
 from io import StringIO
 import pandas as pd
+import numpy as np
 from pathlib import Path
 from helper_functions import retrieve_page_titles
 
@@ -58,6 +59,9 @@ def parse_html_table(table):
             # Convert tuple keys (if any) to strings in the table DataFrame
             table_df.columns = [str(col) if isinstance(col, tuple)
                                 else col for col in table_df.columns]
+
+            # Replace NaN values with None (JSON-compatible)
+            table_df = table_df.replace({np.nan: None})
 
             # Convert DataFrame to list of dictionaries
             # (JSON-like format) and append to parsed_tables
