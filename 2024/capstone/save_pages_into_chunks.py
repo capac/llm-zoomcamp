@@ -49,12 +49,24 @@ def parse_html_table(table):
     # Use pandas to read the HTML table into a DataFrame
     try:
         # Read the first table as DataFrame
-        table_df = pd.read_html(StringIO(str(table)))[0]
-        # Convert tuple keys (if any) to strings in the table DataFrame
-        table_df.columns = [str(col) if isinstance(col, tuple)
-                            else col for col in table_df.columns]
-        # Convert DataFrame to list of dictionaries (JSON-like)
-        return table_df.to_dict(orient='records')
+        tables_df = pd.read_html(StringIO(str(table)), index_col=0,
+                                 flavor=["lxml", "bs4"])
+        # Initialize a list to store all parsed tables
+        parsed_tables = []
+
+        for table_df in tables_df:  # Loop through each DataFrame returned
+            # Convert tuple keys (if any) to strings in the table DataFrame
+            table_df.columns = [str(col) if isinstance(col, tuple)
+                                else col for col in table_df.columns]
+
+            # Convert DataFrame to list of dictionaries
+            # (JSON-like format) and append to parsed_tables
+            parsed_tables.append(table_df.to_dict(orient='records'))
+
+        # Return the list of parsed tables
+        # (each table is a list of dictionaries)
+        return parsed_tables
+
     except ValueError:
         print("Failed to parse table")
         return []
