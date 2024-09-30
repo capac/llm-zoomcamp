@@ -4,6 +4,6 @@ This project aims to create a chatbot that provides information on solar eclipse
 
 ## Files used
 
-* `save_pages_into_chunks.py`
+* `save_pages_into_chunks.py`: This script downloads the first 200 articles from a search on Wikipedia on solar eclipses and saves the articles as chunks in JSON format.
 
-* `index_chunks.py`
+* `index_chunks.py`: This script indexes the chunks from the previous script in Elasticsearch. In order to work, the script requires an Elasticsearch Docker container to be running. The command used to run Elasticsearch is: `docker run -it --rm --name elasticsearch -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -e "xpack.security.enabled=false" elasticsearch:8.4.3`.
