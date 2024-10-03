@@ -10,8 +10,8 @@ index_name = "solar_eclipse_chunks"
 directory_path = Path('wikipedia_pages')
 
 
-# Create the index in Elasticsearch (optional, you can
-# adjust mappings as needed)
+# Create the index in Elasticsearch (optional,
+# you can adjust mappings as needed)
 def create_index():
     if not es.indices.exists(index=index_name):
         es.indices.create(index=index_name)
