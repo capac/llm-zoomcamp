@@ -178,7 +178,8 @@ def process_multiple_pages(page_titles, max_tokens):
 
         # Save each chunked content to a unique JSON file
         if chunked_content:
-            file_name = f"{page_title}_chunks.json"
+            new_title = page_title.replace(' ', '_').replace(',', '').lower()
+            file_name = f"{new_title}_chunks.json"
             save_chunks_as_json(chunked_content, directory_path / file_name)
             print(f"Chunks saved in {file_name}")
         else:
