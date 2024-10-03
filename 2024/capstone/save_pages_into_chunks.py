@@ -118,9 +118,9 @@ def chunk_text(text, max_tokens):
     return chunks
 
 
-# Function to generate unique IDs using a hash function (SHA-256)
+# Function to generate unique IDs using a shorter hash function (SHA-1)
 def generate_unique_id(text):
-    return hashlib.sha256(text.encode('utf-8')).hexdigest()
+    return hashlib.sha1(text.encode('utf-8')).hexdigest()
 
 
 # Function to process the article and save chunks in JSON format
