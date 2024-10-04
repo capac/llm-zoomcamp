@@ -16,7 +16,7 @@ directory_path.mkdir(parents=True, exist_ok=True)
 
 # Main code to search for solar eclipse related pages and extract their titles
 query = "solar eclipse"
-limit = 200  # Number of pages to retrieve
+limit = 500  # Number of pages to retrieve
 
 
 # Function to fetch content from a Wikipedia page
