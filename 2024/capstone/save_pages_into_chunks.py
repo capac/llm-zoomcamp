@@ -14,18 +14,14 @@ from helper_functions import retrieve_page_titles
 directory_path = Path('wikipedia_pages')
 directory_path.mkdir(parents=True, exist_ok=True)
 
-# Main code to search for solar eclipse related pages and extract their titles
-query = "solar eclipse"
-limit = 500  # Number of pages to retrieve
-
 
 # Function to fetch content from a Wikipedia page
 def fetch_wikipedia_content(page_title):
     """
     Fetch the HTML content of a Wikipedia page given its title.
     """
-    base_url = f"https://en.wikipedia.org/wiki/{page_title}"
-    response = requests.get(base_url)
+    BASE_URL = f"https://en.wikipedia.org/wiki/{page_title}"
+    response = requests.get(BASE_URL)
 
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -188,8 +184,20 @@ def process_multiple_pages(page_titles, max_tokens):
 
 # Main script
 def main():
+    # Main code to search for solar eclipse related pages
+    # and extract their titles
+    query = "solar eclipse"
+    category_names = ["20th-century solar eclipses",
+                      "21st-century solar eclipses"]
+    limit = 20  # Number of pages to retrieve
+
     # Process the pages and chunk their content into JSON files
-    page_titles = retrieve_page_titles(query, limit)
+    page_titles = retrieve_page_titles(
+        query,
+        category_titles=category_names,
+        limit=limit
+        )
+    # print(f'Page titles: {page_titles}')
     process_multiple_pages(page_titles, max_tokens=64)
 
 
