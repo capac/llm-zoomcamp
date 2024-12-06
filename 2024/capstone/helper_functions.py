@@ -5,7 +5,7 @@ BASE_URL = "https://en.wikipedia.org/w/api.php"
 
 
 # Function to search Wikipedia for solar eclipse-related articles
-def retrieve_page_titles(query, category_titles="Solar eclipses", limit=10):
+def retrieve_search_texts(query, page_titles="Solar eclipses", limit=10):
     params = {
         "action": "query",
         "list": "search",
@@ -25,10 +25,10 @@ def retrieve_page_titles(query, category_titles="Solar eclipses", limit=10):
 
             # Filter results based on the "Solar_eclipses" category
             for result in search_results:
-                page_title = result["title"]
+                search_text = result["title"]
                 # Check if the page belongs to the Solar_eclipses category
-                if check_page_in_category(page_title, category_titles):
-                    relevant_pages.append(page_title)
+                if check_page_in_category(search_text, page_titles):
+                    relevant_pages.append(search_text)
 
             return relevant_pages
 
@@ -42,10 +42,10 @@ def retrieve_page_titles(query, category_titles="Solar eclipses", limit=10):
 
 
 # Function to check if a page belongs to a specific category
-def check_page_in_category(page_title, category_titles):
+def check_page_in_category(search_text, page_titles):
     params = {
         "action": "query",
-        "titles": page_title,
+        "titles": search_text,
         "prop": "categories",
         "format": "json"
     }
@@ -58,8 +58,8 @@ def check_page_in_category(page_title, category_titles):
             categories = [cat["title"].replace("Category:", "") for cat
                           in page_data["categories"]]
 
-            for category in category_titles:
-                if category in categories:
+            for page in page_titles:
+                if page in categories:
                     return True
 
     return False
@@ -70,9 +70,9 @@ if __name__ == "__main__":
     query = "solar eclipse"
     category_names = ["20th-century solar eclipses",
                       "21st-century solar eclipses"]
-    solar_eclipse_article_titles = retrieve_page_titles(
+    solar_eclipse_article_titles = retrieve_search_texts(
         query, limit=30,
-        category_titles=category_names
+        page_titles=category_names
         )
 
     # Output the relevant page titles
