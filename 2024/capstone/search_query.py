@@ -108,7 +108,8 @@ def query_solar_eclipse(query):
 # Example: Query the index
 def main():
     # Example question
-    user_query = "When will the next solar eclipse occur in the United States?"
+    user_query = ("When will the next solar eclipse "
+                  "occur in the United States?")
 
     # Query Elasticsearch for the answer
     search_results = query_solar_eclipse(user_query)
