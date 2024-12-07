@@ -7,7 +7,7 @@ from io import StringIO
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from helper_functions import retrieve_page_titles
+from helper_functions import retrieve_search_texts
 
 # Specify the path of the directory to create
 # and if it doesn't exist create it
@@ -187,14 +187,17 @@ def main():
     # Main code to search for solar eclipse related pages
     # and extract their titles
     query = "solar eclipse"
-    category_names = ["20th-century solar eclipses",
-                      "21st-century solar eclipses"]
-    limit = 20  # Number of pages to retrieve
+    category_names = [
+        "20th-century solar eclipses",
+        "21st-century solar eclipses",
+        "22nd-century solar eclipses"
+        ]
+    limit = 1000  # Number of pages to retrieve
 
     # Process the pages and chunk their content into JSON files
-    page_titles = retrieve_page_titles(
+    page_titles = retrieve_search_texts(
         query,
-        category_titles=category_names,
+        page_titles=category_names,
         limit=limit
         )
     # print(f'Page titles: {page_titles}')
