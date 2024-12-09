@@ -100,7 +100,8 @@ def rag(query):
 # Example: Query the index
 def main():
     # Example question
-    user_query = "When will the next total solar eclipse occur in Europe?"
+    user_query = ("When will the next total solar eclipse "
+                  "occur in Europe, and where will it happen?")
 
     # Query Elasticsearch for the answer
     search_results = rag(user_query)
