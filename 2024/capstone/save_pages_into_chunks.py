@@ -192,7 +192,7 @@ def main():
         "21st-century solar eclipses",
         "22nd-century solar eclipses"
         ]
-    limit = 1000  # Number of pages to retrieve
+    limit = 6000  # Number of page titles to retrieve
 
     # Process the pages and chunk their content into JSON files
     page_titles = retrieve_search_texts(
