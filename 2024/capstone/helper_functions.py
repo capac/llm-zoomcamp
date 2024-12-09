@@ -15,6 +15,7 @@ def retrieve_search_texts(query, page_titles="Solar eclipses", limit=10):
         "srprop": "",  # Only return the titles
     }
 
+    print("Retrieving page titles...")
     response = requests.get(BASE_URL, params=params)
 
     if response.status_code == 200:
