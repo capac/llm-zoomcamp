@@ -1,83 +1,40 @@
 from elasticsearch import Elasticsearch
-import spacy
+from openai import OpenAI
+
+# Initialize OpenAI client
+client = OpenAI()
 
 # Initialize Elasticsearch
 es = Elasticsearch("http://localhost:9200")
-
-# Load spaCy model
-nlp = spacy.load('en_core_web_sm')
 
 # Index name where documents are stored
 index_name = "solar_eclipse_chunks"
 
 
-# Function to extract location and date from the query
-def extract_entities(query):
-    doc = nlp(query)
-
-    location = None
-    date = None
-
-    for ent in doc.ents:
-        # "GPE" is the entity label for locations like cities and countries
-        if ent.label_ == "GPE":
-            location = ent.text
-        if ent.label_ == "DATE":
-            date = ent.text
-
-    return location, date
-
-
-# Function to build the Elasticsearch query dynamically
-def build_query(query, location, date):
-    must_clauses = [
-        {
-            "multi_match": {
-                "query": query,
-                "fields": ["text", "table"],
-                "type": "best_fields"
-            }
-        }
-    ]
-
-    # If a location was detected, add it as a filter
-    if location:
-        must_clauses.append({
-            "match": {
-                "text": location
-            }
-        })
-
-    # If a date was detected, try to add it as a filter
-    if date:
-        must_clauses.append({
-            "match": {
-                "text": date
-            }
-        })
-
+# Query function to search for relevant answers
+def query_database(query):
+    # Construct the search query
     search_query = {
         "size": 5,
         "query": {
             "bool": {
-                "must": must_clauses
+                "should": [
+                    {
+                        "multi_match": {
+                            "query": query,
+                            # Prioritize text (boosted by ^3) over tables
+                            "fields": ["text^2", "table^1"],
+                            "type": "best_fields"
+                        }
+                    }
+                ],
+                "minimum_should_match": 1  # At least one match required
             }
         }
     }
 
-    return search_query
-
-
-# Function to search in Elasticsearch with dynamic filtering
-def query_solar_eclipse(query):
-    # Extract location and date from the user query
-    location, date = extract_entities(query)
-
-    # Build the Elasticsearch query dynamically based on the extracted entities
-    es_query = build_query(query, location, date)
-
-    # Perform the search in Elasticsearch
-    response = es.search(index=index_name, body=es_query)
+    # Perform the search
+    response = es.search(index=index_name, body=search_query)
 
     # Process and return the results
     results = []
@@ -105,6 +62,41 @@ def query_solar_eclipse(query):
     return results
 
 
+def build_prompt(query, search_results):
+    prompt_template = """
+You're an astronomor enthusiast. Answer the QUESTION based on the CONTEXT from
+the database. Use only the facts from the CONTEXT when answering the QUESTION.
+
+QUESTION: {question}
+
+CONTEXT: {context}
+""".strip()
+
+    context = ""
+
+    for doc in search_results:
+        context = context + f"text: {doc['text']}\ntable: {doc['table']}\n\n"
+
+    prompt = prompt_template.format(question=query, context=context).strip()
+    return prompt
+
+
+def llm(prompt):
+    response = client.chat.completions.create(
+        model='gpt-4o-mini',
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    return response.choices[0].message.content
+
+
+def rag(query):
+    search_results = query_database(query)
+    prompt = build_prompt(query, search_results)
+    answer = llm(prompt)
+    return answer
+
+
 # Example: Query the index
 def main():
     # Example question
@@ -112,20 +104,8 @@ def main():
                   "longest duration in the 21st century?")
 
     # Query Elasticsearch for the answer
-    search_results = query_solar_eclipse(user_query)
-
-    # Print results
-    for result in search_results:
-        if result['text']:
-            print(f"Document ID: {result['doc_id']}")
-            print(f"Chunk ID: {result['chunk_id']}")
-            print(f"Text: {result['text']}")
-        elif result['table']:
-            print(f"Document ID: {result['doc_id']}")
-            print(f"Chunk ID: {result['chunk_id']}")
-            print("Table Data:")
-            for row in result['table']:
-                print(row)
+    search_results = rag(user_query)
+    print(search_results)
 
 
 if __name__ == "__main__":
