@@ -1,20 +1,4 @@
-from gitsource import GithubRepositoryDataReader
+from ingest import download_documents
 
-reader = GithubRepositoryDataReader(
-    repo_owner="DataTalksClub",
-    repo_name="llm-zoomcamp",
-    commit_id="8c1834d",
-    allowed_extensions={"md"},
-    filename_filter=lambda path: "/lessons/" in path,
-)
-
-print("Downloading lessons...")
-files = reader.read()
-
-documents = []
-
-for file in files:
-    doc = file.parse()
-    documents.append(doc)
-
+documents = download_documents()
 print(f"Number of documents downloaded: {len(documents)}")
