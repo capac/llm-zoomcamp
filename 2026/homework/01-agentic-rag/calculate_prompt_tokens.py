@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from gitsource import GithubRepositoryDataReader
+from ingest import download_documents
 from minsearch import Index
 from openai import OpenAI
 from rag_helper import RAGBase, INSTRUCTIONS, PROMPT_TEMPLATE
@@ -12,30 +12,12 @@ openai_client = OpenAI(
     base_url="https://api.openai.com/v1"
 )
 
-reader = GithubRepositoryDataReader(
-    repo_owner="DataTalksClub",
-    repo_name="llm-zoomcamp",
-    commit_id="8c1834d",
-    allowed_extensions={"md"},
-    filename_filter=lambda path: "/lessons/" in path,
-)
-
-print("Downloading lessons...")
-files = reader.read()
-
-documents = []
-
-for file in files:
-    doc = file.parse()
-    documents.append(doc)
-
-print(f"Number of documents downloaded: {len(documents)}")
-
 index = Index(
     text_fields=["content"],
     keyword_fields=["filename"]
 )
 
+documents = download_documents()
 index.fit(documents)
 print("Indexing completed.")
 
