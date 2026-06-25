@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from ingest import download_documents, index_documents
 from openai import OpenAI
-from rag_helper import RAGBase, INSTRUCTIONS, PROMPT_TEMPLATE
+from rag_helper import RAGBase
 
 load_dotenv()
 
@@ -16,6 +16,23 @@ index = index_documents(documents)
 print("Indexing completed.")
 
 question = "How does the agentic loop keep calling the model until it stops?"
+
+INSTRUCTIONS = '''
+Your task is to answer questions from the course participants
+based on the provided context.
+
+Use the context to find relevant information and provide accurate
+answers. If the answer is not found in the context,
+respond with "I don't know."
+'''
+
+PROMPT_TEMPLATE = '''
+QUESTION: {question}
+
+CONTEXT:
+{context}
+'''.strip()
+
 
 rag = RAGBase(
     index=index,
