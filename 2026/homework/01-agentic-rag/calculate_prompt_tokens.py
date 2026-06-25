@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
-from ingest import download_documents
-from minsearch import Index
+from ingest import download_documents, index_documents
 from openai import OpenAI
 from rag_helper import RAGBase, INSTRUCTIONS, PROMPT_TEMPLATE
 
@@ -12,13 +11,8 @@ openai_client = OpenAI(
     base_url="https://api.openai.com/v1"
 )
 
-index = Index(
-    text_fields=["content"],
-    keyword_fields=["filename"]
-)
-
 documents = download_documents()
-index.fit(documents)
+index = index_documents(documents)
 print("Indexing completed.")
 
 question = "How does the agentic loop keep calling the model until it stops?"

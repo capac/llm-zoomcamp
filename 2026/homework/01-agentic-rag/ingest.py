@@ -1,4 +1,5 @@
 from gitsource import GithubRepositoryDataReader
+from minsearch import Index
 
 
 def download_documents(
@@ -26,3 +27,14 @@ def download_documents(
         documents.append(doc)
 
     return documents
+
+
+def index_documents(documents):
+
+    index = Index(
+        text_fields=["content"],
+        keyword_fields=["filename"]
+    )
+
+    index.fit(documents)
+    return index
