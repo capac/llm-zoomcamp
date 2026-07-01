@@ -1,10 +1,10 @@
 from embedder import Embedder
 from gitsource import GithubRepositoryDataReader
 from minsearch import VectorSearch
-from sentence_transformers import SentenceTransformer
+# from sentence_transformers import SentenceTransformer
 import numpy as np
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+# model = SentenceTransformer("all-MiniLM-L6-v2")
 
 reader = GithubRepositoryDataReader(
     repo_owner="DataTalksClub",
@@ -16,10 +16,10 @@ reader = GithubRepositoryDataReader(
 
 documents = [file.parse() for file in reader.read()]
 
-embed = Embedder()
+model = Embedder()
 docs_dict = {}
 for document in documents:
-    docs_dict[document["filename"]] = embed.encode(document["content"])
+    docs_dict[document["filename"]] = model.encode(document["content"])
 
 X = np.array(list(docs_dict.values()))
 y = np.array(list(docs_dict.keys()))
