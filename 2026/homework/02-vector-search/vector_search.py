@@ -27,7 +27,8 @@ y = np.array(list(docs_dict.keys()))
 vector_index = VectorSearch(keyword_fields=["content"])
 vector_index.fit(X, documents)
 
-q1 = "What metric do we use to evaluate a search engine?"
+# q1 = "What metric do we use to evaluate a search engine?"
+q1 = "How do I store vectors in PostgreSQL?"
 v1 = model.encode(q1)
 
 results = vector_index.search(v1, num_results=5)
