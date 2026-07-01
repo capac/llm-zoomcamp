@@ -1,5 +1,5 @@
 from embedder import Embedder
-from gitsource import GithubRepositoryDataReader
+from gitsource import chunk_documents, GithubRepositoryDataReader
 from minsearch import VectorSearch
 import numpy as np
 
@@ -12,17 +12,18 @@ reader = GithubRepositoryDataReader(
 )
 
 documents = [file.parse() for file in reader.read()]
+chunks = chunk_documents(documents, size=2000, step=1000)
 
 model = Embedder()
-docs_dict = {}
-for document in documents:
-    docs_dict[document["filename"]] = model.encode(document["content"])
+chunks_embeddings = []
+for chunk in chunks:
+    embedding = model.encode(chunk["content"])
+    chunks_embeddings.append(embedding)
 
-X = np.array(list(docs_dict.values()))
-y = np.array(list(docs_dict.keys()))
+X = np.array(chunks_embeddings)
 
 vector_index = VectorSearch(keyword_fields=["content"])
-vector_index.fit(X, documents)
+vector_index.fit(X, chunks)
 
 q1 = "What metric do we use to evaluate a search engine?"
 # q1 = "How do I store vectors in PostgreSQL?"
