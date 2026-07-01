@@ -1,10 +1,7 @@
 from embedder import Embedder
 from gitsource import GithubRepositoryDataReader
 from minsearch import VectorSearch
-# from sentence_transformers import SentenceTransformer
 import numpy as np
-
-# model = SentenceTransformer("all-MiniLM-L6-v2")
 
 reader = GithubRepositoryDataReader(
     repo_owner="DataTalksClub",
@@ -27,8 +24,8 @@ y = np.array(list(docs_dict.keys()))
 vector_index = VectorSearch(keyword_fields=["content"])
 vector_index.fit(X, documents)
 
-# q1 = "What metric do we use to evaluate a search engine?"
-q1 = "How do I store vectors in PostgreSQL?"
+q1 = "What metric do we use to evaluate a search engine?"
+# q1 = "How do I store vectors in PostgreSQL?"
 v1 = model.encode(q1)
 
 results = vector_index.search(v1, num_results=5)
